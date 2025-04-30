@@ -50,6 +50,7 @@
 		<span class="error">Your browser does not support<br>the HTML5 &lt;canvas&gt; element</span>
 	</canvas>
 	<div>
+		<input class="center" type="text" id="bugname" placeholder="Enter bug name">
 		<p class="center">Export as: 
 			<a href="javascript:saveAsPNG()">PNG</a> | 
 			<a href="javascript:saveAsSVG()">SVG</a> | 
@@ -58,6 +59,7 @@
 			<a href="javascript:saveAsDOT()">DOT</a> | 
 			<button onclick="javascript:uploadJSON()">Upload JSON</button>
 		</p>
+		<button class="center" id="clearButton" onclick="javascript:clearCanvas()">Clear everything</button>
 		<textarea id="output"></textarea>
 		<p>The big white box above is the FSM designer.&nbsp; Here's how to use it:</p>
 		<ul>

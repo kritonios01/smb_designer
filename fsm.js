@@ -1142,7 +1142,10 @@ function saveAsJSON() {
 
 function saveAsDOT() {
 	var dot = graphToDot(getBackupData());
-	downloadFile("smb.dot", dot, "text/vnd.graphviz");
+	var bugName = document.getElementById("bugname").value.toLowerCase().replace(/\s+/g, "_") + ".dot";
+	
+	// bugName = bugName.toLowerCase().replace(/\s+/g, "_");
+	downloadFile(bugName, dot, "text/vnd.graphviz");
 }
 
 function graphToDot(json) {

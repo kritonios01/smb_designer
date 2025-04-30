@@ -43,6 +43,16 @@ p {
 
 .center {
 	text-align: center;
+	display: block;
+	margin: 0 auto;
+}
+
+#bugname {
+  margin-bottom: 20px;
+}
+
+#clearButton {
+	margin-top: 20px;
 }
 
 textarea {
