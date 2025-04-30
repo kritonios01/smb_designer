@@ -1122,6 +1122,54 @@ function saveAsJSON() {
 	downloadFile("automaton_backup.json", jsonData, "text/json");
 }
 
+function saveAsDOT() {
+	// var jsonData = JSON.stringify(getBackupData());
+	var dot = convertJsonToDot(getBackupData());
+	downloadFile("smb.dot", dot, "text/vnd.graphviz");
+}
+
+function convertJsonToDot(json) {
+  const nodes = json.nodes;
+  const links = json.links;
+  const nodeMap = json.nodeMap;
+
+  let dot = "digraph SMB {\n";
+  // dot += "  rankdir=LR;\n"; // Left-to-right layout
+  // dot += "  node [shape = circle];\n";
+
+	const acceptNodes = nodes.filter(node => node.isAcceptState === true);
+  acceptNodes.forEach(node => {
+    dot += `  ${node.text} [shape="doublecircle"]\n`;
+  });
+
+  dot += "\n"
+
+  let startLink = "";
+  links.forEach(link => {
+    if (link.type === "Link") {
+      dot += `  ${nodeMap[link.nodeA]} -> ${nodeMap[link.nodeB]} [label="${link.text}"]\n`;
+    } else if (link.type === "SelfLink") {
+      dot += `  ${nodeMap[link.node]} -> ${nodeMap[link.node]} [label="${link.text}"]\n`;
+    } else if (link.type === "StartLink") {
+      startLink += `  __start0 -> ${nodeMap[link.node]};\n`;
+    } else {
+      return; // Skip unknown types
+    }
+
+    // const label = link.text ? ` [label="${link.text}"]` : "";
+    // dot += `${label};\n`;
+  });
+
+  dot += "\n"
+
+
+  dot += startLink;
+
+  dot += "}";
+  return dot;
+}
+
+
 function jsonUploaded() {
 	var uploadElement = document.getElementById("jsonUpload");
 	if (uploadElement.files.length < 1) return;
@@ -1219,6 +1267,7 @@ function getBackupData() {
 		'nodes': [],
 		'links': [],
 		'nodeRadius': nodeRadius,
+    'nodeMap': {}
 	};
 	for(var i = 0; i < nodes.length; i++) {
 		var node = nodes[i];
@@ -1230,6 +1279,7 @@ function getBackupData() {
 			'textOnly': node.textOnly,
 		};
 		backup.nodes.push(backupNode);
+    backup.nodeMap[i.toString()] = node.text;
 	}
 	for(var i = 0; i < links.length; i++) {
 		var link = links[i];
