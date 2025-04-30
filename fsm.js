@@ -1123,12 +1123,11 @@ function saveAsJSON() {
 }
 
 function saveAsDOT() {
-	// var jsonData = JSON.stringify(getBackupData());
-	var dot = convertJsonToDot(getBackupData());
+	var dot = graphToDot(getBackupData());
 	downloadFile("smb.dot", dot, "text/vnd.graphviz");
 }
 
-function convertJsonToDot(json) {
+function graphToDot(json) {
   const nodes = json.nodes;
   const links = json.links;
   const nodeMap = json.nodeMap;
