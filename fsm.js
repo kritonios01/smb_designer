@@ -101,6 +101,24 @@ Link.prototype.getEndPointsAndCircle = function() {
 };
 
 Link.prototype.draw = function(c) {
+	// Auto offset adjustment for multiple links between the same nodes
+	if (this.perpendicularPart === 0) {
+		var sameLinks = [];
+		for (var i = 0; i < links.length; i++) {
+			var l = links[i];
+			if (l instanceof Link && ((l.nodeA === this.nodeA && l.nodeB === this.nodeB) ||
+				(l.nodeA === this.nodeB && l.nodeB === this.nodeA))) {
+				sameLinks.push(l);
+			}
+		}
+		if (sameLinks.length > 1) {
+			var idx = sameLinks.indexOf(this);
+			var spacing = 15;
+			// center the links with zero offset for the middle one (if odd number)
+			var offset = (idx - (sameLinks.length - 1) / 2) * spacing;
+			this.perpendicularPart = offset;
+		}
+	}
 	var stuff = this.getEndPointsAndCircle();
 	// draw arc
 	c.beginPath();
