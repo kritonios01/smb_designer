@@ -1142,7 +1142,16 @@ function saveAsJSON() {
 
 function saveAsDOT() {
 	var dot = graphToDot(getBackupData());
-	var bugName = document.getElementById("bugname").value.toLowerCase().replace(/\s+/g, "_") + ".dot";
+	if (dot == -1) {
+		alert("Error: There is a state which is not connected to the graph");
+		return
+	}
+	var bugNameInput = document.getElementById("bugname").value.trim();
+	if (!bugNameInput) {
+		alert("Error: Bug name cannot be empty");
+		return;
+	}
+	var bugName = bugNameInput.toLowerCase().replace(/\s+/g, "_") + ".dot";
 	
 	// bugName = bugName.toLowerCase().replace(/\s+/g, "_");
 	downloadFile(bugName, dot, "text/vnd.graphviz");
@@ -1154,15 +1163,36 @@ function graphToDot(json) {
   const nodeMap = json.nodeMap;
 
   let dot = "digraph SMB {\n";
-  // dot += "  rankdir=LR;\n"; // Left-to-right layout
-  // dot += "  node [shape = circle];\n";
 
-	const acceptNodes = nodes.filter(node => node.isAcceptState === true);
+  const acceptNodes = nodes.filter(node => node.isAcceptState === true);
   acceptNodes.forEach(node => {
     dot += `  ${node.text} [shape="doublecircle"]\n`;
   });
 
-  dot += "\n"
+  dot += "\n";
+
+  // Identify nodes that are connected in any link.
+  const connectedNodes = new Set();
+  links.forEach(link => {
+    if (link.type === "Link") {
+      connectedNodes.add(String(link.nodeA));
+      connectedNodes.add(String(link.nodeB));
+    } else if (link.type === "SelfLink" || link.type === "StartLink") {
+      connectedNodes.add(String(link.node));
+    }
+  });
+
+  // Check if there are any nodes not connected to the graph.
+  const disconnectedNodes = [];
+  nodes.forEach((node, index) => {
+    if (!connectedNodes.has(String(index))) {
+      disconnectedNodes.push(node.text);
+    }
+  });
+
+  if (disconnectedNodes.length > 0) {
+    return -1;
+  }
 
   let startLink = "";
   links.forEach(link => {
@@ -1171,20 +1201,15 @@ function graphToDot(json) {
     } else if (link.type === "SelfLink") {
       dot += `  ${nodeMap[link.node]} -> ${nodeMap[link.node]} [label="${link.text}"]\n`;
     } else if (link.type === "StartLink") {
+      startLink += `  __start0 [label="" shape="none" width="0" height="0"];\n`;
       startLink += `  __start0 -> ${nodeMap[link.node]};\n`;
     } else {
       return; // Skip unknown types
     }
-
-    // const label = link.text ? ` [label="${link.text}"]` : "";
-    // dot += `${label};\n`;
   });
 
-  dot += "\n"
-
-
+  dot += "\n";
   dot += startLink;
-
   dot += "}";
   return dot;
 }
